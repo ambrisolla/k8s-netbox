@@ -7,10 +7,8 @@ spec:
   selector:
     app: netbox
   sessionAffinity: ClientIP
-  externalIPs: 
-    - 10.220.48.71
   ports:
   - port: 80
     targetPort: 8000
     protocol: TCP
-  type: NodePort
+  type: ClientIP
