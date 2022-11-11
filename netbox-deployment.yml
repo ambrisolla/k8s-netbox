@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: netbox
+  name: netbox
+  namespace: netbox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: netbox
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: netbox
+        project: netbox
+    spec:
+      containers:
+      - image: lscr.io/linuxserver/netbox
+        name: netbox
+        envFrom:
+          - configMapRef:
+              name: netbox
+          - secretRef:
+              name: netbox
+        ports:
+        - containerPort: 8000
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - "/bin/bash"
+                - "-c"
+                - |
+                  apk add --update openldap-dev build-base python3-dev
+                  pip install --no-cache-dir python-ldap django-auth-ldap
+        resources: {}
+        volumeMounts:
+          - name:  ldap-config
+            mountPath:  /app/netbox/netbox/netbox/ldap_config.py
+            subPath: ldap_config.py
+      volumes:
+        - name: ldap-config
+          configMap:
+            name: ldap-config
+status: {}

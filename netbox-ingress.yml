@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: netbox
+  namespace: netbox
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: "muzel.io"
+    http:
+      paths:
+      - backend:
+          service:
+            name: netbox
+            port:
+              number: 8000
+        path: /
+        pathType: Prefix
+status:
+  loadBalancer: {}

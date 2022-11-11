@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ldap-config
+  namespace: netbox
+data:
+  ldap_config.py: |-
+    import ldap
+    import os
+    from   django_auth_ldap.config import LDAPSearch, GroupOfNamesType, LDAPGroupQuery
+    # 
+    environ                    = os.environ
+    LDAP_SERVER                = "ldap.brisa.io"
+    LDAP_DN                    = "OU=base,DC=brisa,DC=io"
+    AUTH_LDAP_SERVER_URI       = f"ldap://{LDAP_SERVER}"
+    AUTH_LDAP_BIND_DN          = "CN=group,DC=brisa,DC=io"
+    AUTH_LDAP_BIND_PASSWORD    = "bind-user-password" 
+    AUTH_LDAP_MIRROR_GROUPS    = True
+    LDAP_IGNORE_CERT_ERRORS    = True
+    AUTH_LDAP_FIND_GROUP_PERMS = True
+    AUTH_LDAP_CACHE_TIMEOUT    = 3600
+    # 
+    AUTH_LDAP_CONNECTION_OPTIONS = {
+      ldap.OPT_REFERRALS: 0
+    }
+    AUTH_LDAP_USER_SEARCH = LDAPSearch( f"{LDAP_DN}", ldap.SCOPE_SUBTREE, "(sAMAccountName=%(user)s)")
+    AUTH_LDAP_USER_ATTR_MAP = {
+      "first_name": "givenName",
+      "last_name": "sn",
+      "email": "mail"
+    }
+    AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
+      LDAP_DN,
+      ldap.SCOPE_SUBTREE,
+      "(objectClass=group)")
+    
+    AUTH_LDAP_GROUP_TYPE = GroupOfNamesType()
+    
+    AUTH_LDAP_REQUIRE_GROUP = (
+      LDAPGroupQuery("CN=admin-group,DC=brisa,DC=io") |
+      LDAPGroupQuery("CN=admin-group,DC=brisa,DC=io")
+    )
+    
+    AUTH_LDAP_USER_FLAGS_BY_GROUP = {
+      "is_active":  [
+        "CN=admin-group,DC=brisa,DC=io",
+      ],
+      "is_superuser":   [
+        "CN=admin-group,DC=brisa,DC=io",
+      ],
+      "is_staff":   [
+        "CN=admin-group,DC=brisa,DC=io",
+      ],
+    }
